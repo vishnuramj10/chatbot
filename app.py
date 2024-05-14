@@ -9,12 +9,14 @@ llm = load_model(model_name)
 db = load_pdf("Sample RAG Questions.pdf")
 qa_chain = create_chain(llm, db)
 
-@app.route('/query', methods=['POST'])
+@app.route('/')
 def query():
-    query_text = request.json['query']
-    response = respond(qa_chain, query_text)
-
-    return jsonify({'response': response})
+    query_text = request.args.get('query')
+    if query_text:
+        response = respond(qa_chain, query_text)
+        return jsonify({'response': response})
+    else:
+        return jsonify({'error': 'No query parameter provided'})
 
 if __name__ == '__main__':
     app.run(debug=True)
