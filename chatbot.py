@@ -12,8 +12,11 @@ from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain.document_loaders import PyPDFLoader
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import RetrievalQA
+import os 
 
 def load_model(model_name):
+    hf_token = "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"
+    os.environ['HF_TOKEN'] = hf_token
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
@@ -26,7 +29,7 @@ def load_model(model_name):
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-        text_pipeline = pipeline(
+    text_pipeline = pipeline(
             "text-generation",
             model=model,
             tokenizer=tokenizer,
@@ -68,7 +71,7 @@ def create_chain(llm, db):
     qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
-            retriever=vectordb.as_retriever(search_kwargs={"k": 2}),
+            retriever=db.as_retriever(search_kwargs={"k": 2}),
             chain_type_kwargs={"prompt": prompt},
     )
     return qa_chain
